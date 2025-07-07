@@ -1,198 +1,171 @@
-# DarziFlow Backend
+# DarziFlow App (Flutter Frontend)
 
-This is the backend server for the DarziFlow application, designed to streamline tailoring shop operations in Quetta, Pakistan, and similar contexts.
+This is the Flutter frontend application for DarziFlow, a tailor shop management system.
 
 ## Project Overview
 
-DarziFlow aims to digitize and manage customer interactions, orders, measurements, karigar (craftsman) assignments, payments, and basic inventory for tailoring businesses. This backend is built using Django and Django REST Framework, providing a robust API for a frontend application (e.g., a Flutter mobile app).
+This mobile application provides tailors with an interface to manage customers, orders, measurements, payments, and inventory, interacting with the DarziFlow Backend API.
 
 ## Features Implemented
 
-The backend currently supports the following core modules:
+The backend currently supports the following core modules, and the frontend is actively being developed:
 
-*   **Authentication:** Secure user registration and JWT-based token authentication (login, refresh, verify, logout with token blacklisting).
-*   **Customer Management:** CRUD operations for customers and their multiple measurement sets (with flexible JSON storage for measurements).
-*   **Karigar (Craftsman) Management:** CRUD operations for karigars.
-*   **Inventory Management (Basic):** CRUD operations for fabrics and accessories.
-*   **Order Management:** Comprehensive order processing including:
-    *   Creating orders with multiple items.
-    *   Linking orders to customers, karigars.
-    *   Tracking order status, due dates, pricing (total, advance, due).
-    *   Associating order items with specific measurements and fabrics from inventory.
-    *   File uploads (voice notes, design images) directly with orders.
-*   **Payment Management:** Recording and managing multiple payments against orders.
-*   **Advanced Filtering & Searching:** Most list endpoints support searching and filtering for easier data retrieval.
+*   **Authentication:**
+    *   Backend: Secure user registration and JWT-based token authentication.
+    *   Frontend: Login Screen, Logout functionality, auth state management (Riverpod), secure token storage, and auth-based navigation.
+*   **Dashboard Screen:**
+    *   Frontend: Displays key metrics like active orders, order counts by status, and sales summaries by fetching and processing data from the backend. Handles loading and error states.
+*   **Customer Management:**
+    *   Backend: Full CRUD for customers and measurements.
+    *   Frontend: (Development In Progress)
+*   **Karigar (Craftsman) Management:**
+    *   Backend: Full CRUD for karigars.
+    *   Frontend: (Development In Progress)
+*   **Inventory Management (Basic):**
+    *   Backend: Full CRUD for fabrics and accessories.
+    *   Frontend: (Development In Progress)
+*   **Order Management:**
+    *   Backend: Comprehensive order processing including items, pricing, status, assignments, and file uploads (voice notes, design images).
+    *   Frontend: (Development In Progress)
+*   **Payment Management:**
+    *   Backend: Recording and managing multiple payments against orders.
+    *   Frontend: (Development In Progress)
 
 ## Technology Stack
 
-*   **Backend Framework:** Django
-*   **API Framework:** Django REST Framework (DRF)
-*   **Database:** PostgreSQL (recommended, configurable via `DATABASE_URL`, defaults to SQLite for quick setup)
-*   **Authentication:** JWT (JSON Web Tokens) via `djangorestframework-simplejwt`
-*   **File Handling:** Direct uploads to media directory, configurable for cloud storage in production.
-*   **Dependencies:** `django-cors-headers` (for CORS), `django-filter` (for filtering), `drf-nested-routers` (for nested API routes), `Pillow` (for image processing), `psycopg2-binary` (for PostgreSQL), `dj-database-url` (for DB config).
+*   **Framework:** Flutter
+*   **Programming Language:** Dart
+*   **State Management:** Riverpod (`flutter_riverpod`, `hooks_riverpod`)
+*   **Navigation:** GoRouter (`go_router`)
+*   **HTTP Client:** `http` package
+*   **Secure Storage:** `flutter_secure_storage` (for auth tokens)
+*   **Simple Key-Value Storage:** `shared_preferences`
+*   **Filtering (Frontend view logic):** Data processing within providers. Backend uses `django-filter`.
+*   **Utility:** `intl` (for formatting)
+*   **Image Handling:** Flutter's built-in Image widgets. For selecting images, a package like `image_picker` will be used.
 
-## Directory Structure Overview
+## Project Structure
+
+The project follows a feature-first approach for scalability:
 
 ```
-darziflow_backend/
-├── darziflow_backend/    # Main project configuration (settings.py, urls.py)
-├── accounts/             # User authentication, registration
-├── core/                 # Core project utilities, base configurations (currently minimal)
-├── customers/            # Customer and Measurement management
-├── inventory/            # Fabric and Accessory management
-├── karigars/             # Karigar (craftsman) management
-├── orders/               # Order, OrderItem, and Payment management
-├── mediafiles/           # Default location for user-uploaded files (Order voice notes, images)
-├── staticfiles/          # Default location for collected static files (for production)
-├── manage.py             # Django's command-line utility
-├── requirements.txt      # Project dependencies
-├── .env.example          # Example environment variables file
-└── README.md             # This file
+darziflow_app/
+├── lib/
+│   ├── main.dart             # Main application entry point
+│   └── src/
+│       ├── app.dart            # Root application widget (MaterialApp.router)
+│       ├── core/               # Core utilities, constants, themes, enums
+│       ├── config/             # App configuration (e.g., API base URL)
+│       ├── data/               # Data layer: models, data providers, repositories
+│       ├── features/           # Feature modules (auth, dashboard, customers, etc.)
+│       │   └── auth/
+│       │       ├── screens/    # UI screens for the feature
+│       │       ├── widgets/    # Widgets specific to this feature
+│       │       └── providers/  # State management (Riverpod providers) for this feature
+│       │   └── dashboard/
+│       │       ├── screens/
+│       │       └── providers/
+│       │   └── ... (other features)
+│       ├── navigation/         # Navigation logic, AppRoutes, GoRouter configuration
+│       ├── services/           # API service classes (AuthService, CustomerService, etc.)
+│       ├── shared_widgets/     # Globally reusable UI components
+│       └── state_management/   # Global Riverpod providers setup (app_providers.dart)
+├── assets/                 # Static assets (images, fonts, icons)
+│   ├── images/
+│   ├── fonts/
+│   └── icons/
+├── test/                   # Unit and widget tests
+├── pubspec.yaml            # Dependencies and project metadata
+└── README.md               # This file
 ```
 
-## Environment Setup
+## Getting Started (macOS Setup Guide)
 
-Follow these steps to set up the local development environment.
+Follow these instructions to set up and run the project locally on a macOS machine.
 
 ### 1. Prerequisites
 
-*   **Python:** Version 3.8+ recommended.
-*   **pip:** Python package installer (usually comes with Python).
-*   **PostgreSQL:** A running PostgreSQL server. You'll need to create a database and a user for the application. (Alternatively, for a quick test without PostgreSQL, the project will default to SQLite if `DATABASE_URL` is not set in `.env`).
-*   **Virtual Environment Tool** (recommended): `venv` (built-in) or `virtualenv`.
-*   **Git**
+*   **Flutter SDK:** Ensure you have Flutter installed (latest stable version recommended). If not, follow the official Flutter installation guide: [https://docs.flutter.dev/get-started/install/macos](https://docs.flutter.dev/get-started/install/macos)
+*   **Xcode:** For building and running iOS apps. Install from the Mac App Store. After installing, open Xcode once to accept license agreements and install command-line tools if prompted: `sudo xcodebuild -license accept` and `xcode-select --install`.
+*   **Android Studio:** For building and running Android apps, and for Android SDK/emulator management. Download from [https://developer.android.com/studio](https://developer.android.com/studio).
+*   **Git:** For cloning the repository.
+*   **An IDE:** Android Studio (with Flutter plugin), VS Code (with Flutter extension), or IntelliJ IDEA (with Flutter plugin).
 
 ### 2. Clone the Repository
 
 ```bash
-git clone <your-repository-url> darziflow_backend
-cd darziflow_backend
+git clone <your-repository-url> darziflow_app
+cd darziflow_app
 ```
+(Replace `<your-repository-url>` with the actual URL of your Git repository)
 
-### 3. Create and Activate Virtual Environment
+### 3. Configure Flutter
 
+Ensure your Flutter environment is set up correctly:
 ```bash
-# Using venv (Python 3 built-in)
-python -m venv venv
-
-# On macOS/Linux:
-source venv/bin/activate
-
-# On Windows:
-venv\Scripts\activate
+flutter doctor
 ```
+Address any issues reported by `flutter doctor`. This might involve installing Android SDK command-line tools, CocoaPods (for iOS), etc.
 
 ### 4. Install Dependencies
 
+Fetch the Flutter packages defined in `pubspec.yaml`:
 ```bash
-pip install -r requirements.txt
+flutter pub get
 ```
 
-### 5. Configure Environment Variables
+### 5. Backend Server
 
-Copy the example environment file and customize it:
+Ensure the DarziFlow Backend server is running and accessible.
+*   Refer to the backend's `README.md` for its setup instructions.
+*   The API base URL for the Flutter app is configured in `lib/src/config/app_config.dart`.
+    *   For Android Emulator connecting to a backend on the same machine: `http://10.0.2.2:8000/api/v1` (default in `app_config.dart`).
+    *   For iOS Simulator or physical devices on the same Wi-Fi network: Use your computer's local network IP address (e.g., `http://192.168.1.100:8000/api/v1`). You can find your IP using `ifconfig` (macOS/Linux) or `ipconfig` (Windows) in the terminal.
 
-```bash
-cp .env.example .env
-```
+### 6. Running the Application
 
-Now, edit the `.env` file with your specific settings:
+*   **Open an Emulator/Simulator:**
+    *   For Android: Open Android Studio > Virtual Device Manager (or Tools > AVD Manager) > Start an emulator.
+    *   For iOS: Open Simulator (`open -a Simulator` in terminal, or via Xcode).
+*   **Or, Connect a Physical Device:** Ensure developer mode and USB debugging (Android) or build to device (iOS) are set up.
 
-*   `DJANGO_SECRET_KEY`: Generate a new strong secret key. You can use an online generator or Django's `get_random_secret_key()` utility.
-*   `DJANGO_DEBUG`: Set to `True` for development, `False` for production.
-*   `DJANGO_ALLOWED_HOSTS`: For development, `localhost,127.0.0.1` is usually fine.
-*   `DATABASE_URL`: Configure your PostgreSQL connection string.
-    *   Format: `postgres://USER:PASSWORD@HOST:PORT/DBNAME`
-    *   Example: `postgres://darziuser:darzipass@localhost:5432/darziflow_db`
-    *   Ensure the database (`darziflow_db` in the example) and user (`darziuser`) exist in your PostgreSQL server and the user has permissions on the database.
-*   `CORS_ALLOWED_ORIGINS`: Update this if your frontend will run on a different port or domain during development (e.g., `http://localhost:8080` for a Vue/React dev server).
+*   **Run the app from your IDE or terminal:**
+    ```bash
+    flutter run
+    ```
+    To run on a specific device if multiple are connected (use `flutter devices` to list them):
+    ```bash
+    flutter run -d <deviceId>
+    ```
 
-### 6. Database Setup
+### Key Libraries Used:
 
-Once your `.env` file is configured (especially `DATABASE_URL`), run database migrations to create the necessary tables:
+*   **State Management:** `flutter_riverpod` & `hooks_riverpod` for scalable and testable state management.
+*   **Navigation:** `go_router` for declarative routing, deep linking, and auth-based redirects.
+*   **HTTP Client:** `http` package for making API calls.
+*   **Secure Storage:** `flutter_secure_storage` for storing sensitive data like authentication tokens.
+*   **Simple Key-Value Storage:** `shared_preferences` (for general app preferences).
+*   **Utility:** `intl` package for internationalization and date/number formatting.
 
-```bash
-python manage.py migrate
-```
+### API Service Layer
 
-### 7. Create a Superuser (Optional but Recommended)
+*   Located in `lib/src/services/`.
+*   `api_service.dart` provides a base client for HTTP requests, handling headers (including Authorization tokens from `flutter_secure_storage`) and basic response/error parsing.
+*   Feature-specific services like `auth_service.dart`, `customer_service.dart`, `order_service.dart` build upon `api_service.dart`.
 
-This allows access to the Django Admin interface (`/admin/`) for managing data directly.
+### State Management (Riverpod)
 
-```bash
-python manage.py createsuperuser
-```
-Follow the prompts to set a username, email (optional), and password.
+*   Global service providers (like `apiServiceProvider`, `authServiceProvider`) are typically defined in `lib/src/state_management/app_providers.dart`.
+*   Feature-specific state (e.g., authentication state via `AuthNotifier`, dashboard metrics via `DashboardNotifier`) is managed by `StateNotifier` classes and corresponding providers, located within the feature's `providers` directory.
+*   The application's root widget in `main.dart` is wrapped in a `ProviderScope`.
 
-### 8. Run the Development Server
+### Navigation (GoRouter)
 
-```bash
-python manage.py runserver
-```
-The backend API should now be accessible, typically at `http://127.0.0.1:8000/`.
-
-## API Endpoints Summary
-
-The API is versioned under `/api/v1/`. Here are the main resource groups:
-
-*   **Authentication & Accounts:**
-    *   `POST /api/v1/auth/token/`: Obtain JWT access and refresh tokens (Login).
-    *   `POST /api/v1/auth/token/refresh/`: Refresh JWT access token.
-    *   `POST /api/v1/auth/token/verify/`: Verify JWT access token.
-    *   `POST /api/v1/accounts/register/`: Register a new user.
-    *   `GET /api/v1/accounts/me/`: Get current authenticated user's details.
-    *   `POST /api/v1/accounts/logout/`: Logout (blacklists refresh token).
-
-*   **Customers:**
-    *   `GET, POST /api/v1/customers/`
-    *   `GET, PUT, PATCH, DELETE /api/v1/customers/{id}/`
-    *   **Nested Measurements:**
-        *   `GET, POST /api/v1/customers/{customer_pk}/measurements/`
-        *   `GET, PUT, PATCH, DELETE /api/v1/customers/{customer_pk}/measurements/{id}/`
-
-*   **Karigars (Craftsmen):**
-    *   `GET, POST /api/v1/karigars/`
-    *   `GET, PUT, PATCH, DELETE /api/v1/karigars/{id}/`
-
-*   **Inventory:**
-    *   **Fabrics:**
-        *   `GET, POST /api/v1/inventory/fabrics/`
-        *   `GET, PUT, PATCH, DELETE /api/v1/inventory/fabrics/{id}/`
-    *   **Accessories:**
-        *   `GET, POST /api/v1/inventory/accessories/`
-        *   `GET, PUT, PATCH, DELETE /api/v1/inventory/accessories/{id}/`
-
-*   **Orders:**
-    *   `GET, POST /api/v1/orders/`
-    *   `GET, PUT, PATCH, DELETE /api/v1/orders/{id}/`
-    *   Order creation supports nested `items` (OrderItems).
-    *   File uploads for `voice_note` and `design_image` are part of Order create/update (use `multipart/form-data`).
-    *   **Nested Payments:**
-        *   `GET, POST /api/v1/orders/{order_pk}/payments/`
-        *   `GET, PUT, PATCH, DELETE /api/v1/orders/{order_pk}/payments/{id}/`
-
-**Note on API Usage:**
-*   Most endpoints require authentication (Bearer token in Authorization header).
-*   List endpoints support pagination, searching (`?search=...`), and ordering (`?ordering=...`).
-*   Refer to the detailed API Contract document (from Phase 2) for specific request/response body structures and status codes.
-
-## File Uploads
-
-*   Order voice notes and design images can be uploaded when creating or updating an Order.
-*   Use `multipart/form-data` for requests that include file uploads.
-*   Files are stored in the `mediafiles/` directory during development. For production, configure external storage (e.g., S3).
-
-## Running Tests (Placeholder)
-
-```bash
-python manage.py test
-# Specific app tests:
-# python manage.py test orders
-# python manage.py test customers
-```
-(No tests have been written yet, but this is where the command would go.)
+*   Configured in `lib/src/navigation/app_router.dart`.
+*   Uses `GoRouter` for declarative, URL-based routing.
+*   Implements authentication-based redirection logic listening to `AuthNotifier`.
+*   Route paths can be centralized using the `AppRoutes` class.
 
 ---
-This backend provides a solid foundation for the DarziFlow application. For detailed API specifications, please refer to the API contract documentation.
+This README will be updated as more features and screens are developed.
 ```
