@@ -31,14 +31,14 @@ The backend currently supports the following core modules, and the frontend is a
 *   **Payment Management:**
     *   Backend: Recording and managing multiple payments against orders.
     *   Frontend: Integrated into Order Detail screen (list payments, add new payment via dialog, delete payment).
+*   **Retail/POS (Basic):**
+    *   Frontend: A simple interface for quick retail sales of existing inventory items (accessories). Allows item selection, cart management, optional customer association, and processing the sale by creating a simplified, fully paid order.
 *   **Karigar (Craftsman) Management:**
     *   Backend: Full CRUD for karigars.
-    *   Frontend: (Development In Progress - basic model and service placeholder exists)
+    *   Frontend: (Development In Progress - basic model, service, and providers exist)
 *   **Inventory Management (Basic):**
     *   Backend: Full CRUD for fabrics and accessories.
-    *   Frontend: (Development In Progress - basic models and service placeholders exist)
-*   **Retail/POS (Basic):**
-    *   Frontend: (Development In Progress)
+    *   Frontend: (Development In Progress - basic models, service, and providers exist; Accessories used by POS)
 
 
 ## Technology Stack
@@ -52,7 +52,7 @@ The backend currently supports the following core modules, and the frontend is a
 *   **Simple Key-Value Storage:** `shared_preferences`
 *   **Filtering:** `django-filter` (backend), client-side logic, and `flutter_riverpod` for UI state.
 *   **File Picking:** `image_picker`, `file_picker`
-*   **Utility:** `intl` (for formatting)
+*   **Utility:** `intl` (for formatting), `uuid` (for temporary client-side IDs)
 
 ## Project Structure
 
@@ -67,7 +67,7 @@ darziflow_app/
 │       ├── core/               # Core utilities, constants, themes, enums
 │       ├── config/             # App configuration (e.g., API base URL)
 │       ├── data/               # Data layer: models, data providers, repositories
-│       ├── features/           # Feature modules (auth, dashboard, customers, orders etc.)
+│       ├── features/           # Feature modules (auth, dashboard, customers, orders, retail_pos etc.)
 │       │   └── auth/
 │       │   │   ├── screens/    # UI screens for the feature
 │       │   │   ├── widgets/    # Widgets specific to this feature
@@ -79,6 +79,9 @@ darziflow_app/
 │       │   │   ├── screens/
 │       │   │   └── providers/
 │       │   └── orders/
+│       │   │   ├── screens/
+│       │   │   └── providers/
+│       │   └── retail_pos/
 │       │       ├── screens/
 │       │       └── providers/
 │       │   └── ... (other features)
@@ -163,18 +166,18 @@ Ensure the DarziFlow Backend server is running and accessible.
 *   **Simple Key-Value Storage:** `shared_preferences`
 *   **Filtering (Backend):** `django-filter` (Backend uses this for query parameter-based filtering)
 *   **File Picking:** `image_picker`, `file_picker`
-*   **Utility:** `intl`
+*   **Utility:** `intl`, `uuid`
 
 ### API Service Layer
 
 *   Located in `lib/src/services/`.
 *   `api_service.dart` provides a base client for HTTP requests.
-*   Feature-specific services (`AuthService`, `CustomerService`, `OrderService`, etc.) use `ApiService`.
+*   Feature-specific services (`AuthService`, `CustomerService`, `OrderService`, `InventoryService`, `KarigarService`) use `ApiService`.
 
 ### State Management (Riverpod)
 
 *   Global service providers in `lib/src/state_management/app_providers.dart`.
-*   Feature-specific state managed by `StateNotifier` classes and providers (e.g., `AuthNotifier`, `DashboardNotifier`, `CustomerListNotifier`, `OrderDetailNotifier`, `OrderFormNotifier`, `OrderListNotifier`).
+*   Feature-specific state managed by `StateNotifier` classes and providers (e.g., `AuthNotifier`, `DashboardNotifier`, `CustomerListNotifier`, `OrderDetailNotifier`, `OrderFormNotifier`, `POSNotifier`).
 *   App root wrapped in `ProviderScope`.
 
 ### Navigation (GoRouter)
