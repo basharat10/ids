@@ -17,7 +17,11 @@ The backend currently supports the following core modules, and the frontend is a
     *   Frontend: Displays key metrics like active orders, order counts by status, and sales summaries by fetching and processing data from the backend. Handles loading and error states.
 *   **Customer Management:**
     *   Backend: Full CRUD for customers and measurements.
-    *   Frontend: (Development In Progress)
+    *   Frontend:
+        *   Customer List Screen with search, pagination, and pull-to-refresh.
+        *   Add/Edit Customer Screen with form validation.
+        *   Customer Detail Screen displaying customer information and their measurement sets.
+        *   Dialog for Adding/Editing/Viewing measurements (JSON input for measurement data).
 *   **Karigar (Craftsman) Management:**
     *   Backend: Full CRUD for karigars.
     *   Frontend: (Development In Progress)
@@ -29,7 +33,7 @@ The backend currently supports the following core modules, and the frontend is a
     *   Frontend: (Development In Progress)
 *   **Payment Management:**
     *   Backend: Recording and managing multiple payments against orders.
-    *   Frontend: (Development In Progress)
+    *   Frontend: (Development In Progress, payments can be listed on Order Detail and created/managed via nested routes)
 
 ## Technology Stack
 
@@ -59,10 +63,13 @@ darziflow_app/
 │       ├── data/               # Data layer: models, data providers, repositories
 │       ├── features/           # Feature modules (auth, dashboard, customers, etc.)
 │       │   └── auth/
-│       │       ├── screens/    # UI screens for the feature
-│       │       ├── widgets/    # Widgets specific to this feature
-│       │       └── providers/  # State management (Riverpod providers) for this feature
+│       │   │   ├── screens/    # UI screens for the feature
+│       │   │   ├── widgets/    # Widgets specific to this feature
+│       │   │   └── providers/  # State management (Riverpod providers) for this feature
 │       │   └── dashboard/
+│       │   │   ├── screens/
+│       │   │   └── providers/
+│       │   └── customers/
 │       │       ├── screens/
 │       │       └── providers/
 │       │   └── ... (other features)
@@ -145,6 +152,7 @@ Ensure the DarziFlow Backend server is running and accessible.
 *   **HTTP Client:** `http` package for making API calls.
 *   **Secure Storage:** `flutter_secure_storage` for storing sensitive data like authentication tokens.
 *   **Simple Key-Value Storage:** `shared_preferences` (for general app preferences).
+*   **Nested Routing:** `drf-nested-routers` (Note: This is a Django library for backend. Frontend uses GoRouter's nested routing capabilities). *Correction: `drf-nested-routers` is a backend library. The Flutter equivalent used for nested routes is `go_router` itself, or packages like `flutter_modular` or custom setups if not using `go_router`'s built-in nesting. For this project, `go_router`'s native nesting or `ShellRoute` is used.* The `drf-nested-routers` was mentioned in a backend context previously, not directly a Flutter lib. The Flutter frontend uses `go_router` for all its routing needs, including nested routes.
 *   **Utility:** `intl` package for internationalization and date/number formatting.
 
 ### API Service Layer
@@ -156,7 +164,7 @@ Ensure the DarziFlow Backend server is running and accessible.
 ### State Management (Riverpod)
 
 *   Global service providers (like `apiServiceProvider`, `authServiceProvider`) are typically defined in `lib/src/state_management/app_providers.dart`.
-*   Feature-specific state (e.g., authentication state via `AuthNotifier`, dashboard metrics via `DashboardNotifier`) is managed by `StateNotifier` classes and corresponding providers, located within the feature's `providers` directory.
+*   Feature-specific state (e.g., authentication state via `AuthNotifier`, dashboard metrics via `DashboardNotifier`, customer data via `CustomerListNotifier` and `CustomerDetailNotifier`) is managed by `StateNotifier` classes and corresponding providers, located within the feature's `providers` directory.
 *   The application's root widget in `main.dart` is wrapped in a `ProviderScope`.
 
 ### Navigation (GoRouter)
@@ -164,7 +172,8 @@ Ensure the DarziFlow Backend server is running and accessible.
 *   Configured in `lib/src/navigation/app_router.dart`.
 *   Uses `GoRouter` for declarative, URL-based routing.
 *   Implements authentication-based redirection logic listening to `AuthNotifier`.
-*   Route paths can be centralized using the `AppRoutes` class.
+*   Route paths are centralized using the `AppRoutes` class.
+*   Supports nested routes for features like customer measurements and order payments.
 
 ---
 This README will be updated as more features and screens are developed.
