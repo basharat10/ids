@@ -21,19 +21,25 @@ The backend currently supports the following core modules, and the frontend is a
         *   Customer List Screen with search, pagination, and pull-to-refresh.
         *   Add/Edit Customer Screen with form validation.
         *   Customer Detail Screen displaying customer information and their measurement sets.
-        *   Dialog for Adding/Editing/Viewing measurements (JSON input for measurement data).
-*   **Karigar (Craftsman) Management:**
-    *   Backend: Full CRUD for karigars.
-    *   Frontend: (Development In Progress)
-*   **Inventory Management (Basic):**
-    *   Backend: Full CRUD for fabrics and accessories.
-    *   Frontend: (Development In Progress)
+        *   Dialog for Adding/Editing/Viewing measurements.
 *   **Order Management:**
     *   Backend: Comprehensive order processing including items, pricing, status, assignments, and file uploads (voice notes, design images).
-    *   Frontend: (Development In Progress)
+    *   Frontend:
+        *   Order List Screen with search, status filtering, pagination, and pull-to-refresh.
+        *   Create/Edit Order Screen with complex form for order details, dynamic item management, customer/karigar selection, file uploads, and pricing.
+        *   Order Detail Screen displaying comprehensive order information, items, attachments, payments, and allowing status changes and payment recording.
 *   **Payment Management:**
     *   Backend: Recording and managing multiple payments against orders.
-    *   Frontend: (Development In Progress, payments can be listed on Order Detail and created/managed via nested routes)
+    *   Frontend: Integrated into Order Detail screen (list payments, add new payment via dialog, delete payment).
+*   **Karigar (Craftsman) Management:**
+    *   Backend: Full CRUD for karigars.
+    *   Frontend: (Development In Progress - basic model and service placeholder exists)
+*   **Inventory Management (Basic):**
+    *   Backend: Full CRUD for fabrics and accessories.
+    *   Frontend: (Development In Progress - basic models and service placeholders exist)
+*   **Retail/POS (Basic):**
+    *   Frontend: (Development In Progress)
+
 
 ## Technology Stack
 
@@ -44,9 +50,9 @@ The backend currently supports the following core modules, and the frontend is a
 *   **HTTP Client:** `http` package
 *   **Secure Storage:** `flutter_secure_storage` (for auth tokens)
 *   **Simple Key-Value Storage:** `shared_preferences`
-*   **Filtering (Frontend view logic):** Data processing within providers. Backend uses `django-filter`.
+*   **Filtering:** `django-filter` (backend), client-side logic, and `flutter_riverpod` for UI state.
+*   **File Picking:** `image_picker`, `file_picker`
 *   **Utility:** `intl` (for formatting)
-*   **Image Handling:** Flutter's built-in Image widgets. For selecting images, a package like `image_picker` will be used.
 
 ## Project Structure
 
@@ -61,7 +67,7 @@ darziflow_app/
 │       ├── core/               # Core utilities, constants, themes, enums
 │       ├── config/             # App configuration (e.g., API base URL)
 │       ├── data/               # Data layer: models, data providers, repositories
-│       ├── features/           # Feature modules (auth, dashboard, customers, etc.)
+│       ├── features/           # Feature modules (auth, dashboard, customers, orders etc.)
 │       │   └── auth/
 │       │   │   ├── screens/    # UI screens for the feature
 │       │   │   ├── widgets/    # Widgets specific to this feature
@@ -70,6 +76,9 @@ darziflow_app/
 │       │   │   ├── screens/
 │       │   │   └── providers/
 │       │   └── customers/
+│       │   │   ├── screens/
+│       │   │   └── providers/
+│       │   └── orders/
 │       │       ├── screens/
 │       │       └── providers/
 │       │   └── ... (other features)
@@ -147,33 +156,32 @@ Ensure the DarziFlow Backend server is running and accessible.
 
 ### Key Libraries Used:
 
-*   **State Management:** `flutter_riverpod` & `hooks_riverpod` for scalable and testable state management.
-*   **Navigation:** `go_router` for declarative routing, deep linking, and auth-based redirects.
-*   **HTTP Client:** `http` package for making API calls.
-*   **Secure Storage:** `flutter_secure_storage` for storing sensitive data like authentication tokens.
-*   **Simple Key-Value Storage:** `shared_preferences` (for general app preferences).
-*   **Nested Routing:** `drf-nested-routers` (Note: This is a Django library for backend. Frontend uses GoRouter's nested routing capabilities). *Correction: `drf-nested-routers` is a backend library. The Flutter equivalent used for nested routes is `go_router` itself, or packages like `flutter_modular` or custom setups if not using `go_router`'s built-in nesting. For this project, `go_router`'s native nesting or `ShellRoute` is used.* The `drf-nested-routers` was mentioned in a backend context previously, not directly a Flutter lib. The Flutter frontend uses `go_router` for all its routing needs, including nested routes.
-*   **Utility:** `intl` package for internationalization and date/number formatting.
+*   **State Management:** `flutter_riverpod` & `hooks_riverpod`
+*   **Navigation:** `go_router`
+*   **HTTP Client:** `http`
+*   **Secure Storage:** `flutter_secure_storage`
+*   **Simple Key-Value Storage:** `shared_preferences`
+*   **Filtering (Backend):** `django-filter` (Backend uses this for query parameter-based filtering)
+*   **File Picking:** `image_picker`, `file_picker`
+*   **Utility:** `intl`
 
 ### API Service Layer
 
 *   Located in `lib/src/services/`.
-*   `api_service.dart` provides a base client for HTTP requests, handling headers (including Authorization tokens from `flutter_secure_storage`) and basic response/error parsing.
-*   Feature-specific services like `auth_service.dart`, `customer_service.dart`, `order_service.dart` build upon `api_service.dart`.
+*   `api_service.dart` provides a base client for HTTP requests.
+*   Feature-specific services (`AuthService`, `CustomerService`, `OrderService`, etc.) use `ApiService`.
 
 ### State Management (Riverpod)
 
-*   Global service providers (like `apiServiceProvider`, `authServiceProvider`) are typically defined in `lib/src/state_management/app_providers.dart`.
-*   Feature-specific state (e.g., authentication state via `AuthNotifier`, dashboard metrics via `DashboardNotifier`, customer data via `CustomerListNotifier` and `CustomerDetailNotifier`) is managed by `StateNotifier` classes and corresponding providers, located within the feature's `providers` directory.
-*   The application's root widget in `main.dart` is wrapped in a `ProviderScope`.
+*   Global service providers in `lib/src/state_management/app_providers.dart`.
+*   Feature-specific state managed by `StateNotifier` classes and providers (e.g., `AuthNotifier`, `DashboardNotifier`, `CustomerListNotifier`, `OrderDetailNotifier`, `OrderFormNotifier`, `OrderListNotifier`).
+*   App root wrapped in `ProviderScope`.
 
 ### Navigation (GoRouter)
 
 *   Configured in `lib/src/navigation/app_router.dart`.
-*   Uses `GoRouter` for declarative, URL-based routing.
-*   Implements authentication-based redirection logic listening to `AuthNotifier`.
-*   Route paths are centralized using the `AppRoutes` class.
-*   Supports nested routes for features like customer measurements and order payments.
+*   Uses `GoRouter` for declarative, URL-based routing with auth-based redirection.
+*   Supports nested routes (e.g., customer measurements, order payments).
 
 ---
 This README will be updated as more features and screens are developed.
